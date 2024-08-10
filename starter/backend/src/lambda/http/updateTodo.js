@@ -1,7 +1,22 @@
-export function handler(event) {
+import { createLogger } from '../../utils/logger.mjs'
+import { updateTodo } from "../../businessLogic/todos.mjs";
+import { getUserId } from "../utils.mjs";
+
+const httpEventLogger = createLogger('http')
+
+export async function handler(event) {
+  const updateRequest = JSON.parse(event.body);
   const todoId = event.pathParameters.todoId
-  const updatedTodo = JSON.parse(event.body)
-  
-  // TODO: Update a TODO item with the provided id using values in the "updatedTodo" object
-  return undefined
+  const userId = getUserId(event)
+
+  httpEventLogger.info(`Now processing updateTodo ${JSON.stringify(updateRequest, null, 2)}, id: ${todoId}`)
+  await updateTodo(userId, todoId, updateRequest);
+  httpEventLogger.info(`Finished processing updateTodo ${JSON.stringify(updateRequest, null, 2)}, id: ${todoId}`)
+
+  return {
+    statusCode: 204,
+    headers: {
+      'Access-Control-Allow-Origin': '*'
+    },
+  };
 }
